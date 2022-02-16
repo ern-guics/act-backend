@@ -1,7 +1,7 @@
-export interface MailSender {
+export interface IMailSender {
   send(mailConfig: MailConfig): void;
 }
-type MailConfig = {
+export type MailConfig = {
   from: string;
   to: string | string[];
   subject: string;

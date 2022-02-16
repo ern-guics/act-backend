@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+        .imagem{
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        body{
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+        }
+        .container{
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            width: 80px;
+            background: #6e0b0b;
+        }
+
+        h1,p{
+            color: #1A1A1A;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="imagem">
+        <img src="{{link_img}}">
+        
+        </img>
+    </div>
+    <div class="container">
+        <h1 class="title">Bem vindo, {{name}}</h1>
+        <p class="description">Sua Conta foi criada!</p>
+        <p class="description">Para ativar sua conta, clique no link abaixo</p>
+        <a href="{{link}}">Ativar</a>
+    </div>
+</body>
+</html>

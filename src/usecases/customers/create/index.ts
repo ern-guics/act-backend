@@ -1,4 +1,5 @@
-import { Encrypter } from "@helpers/Encrypter/types";
+import { IEncrypter } from "@helpers/Encrypter/types";
+import { MailSender } from "@helpers/MailSender/types";
 import { ICreateUserToken } from "@helpers/utils";
 import { UserRepository } from "@repositories/User/types";
 import {
@@ -18,19 +19,23 @@ gerar token de acesso
 envia email
 */
 export const ERROR_USER_NAME_INVALID = "Usuário precisa de ter um nome válido";
-export const ERROR_USER_PASSWORD_INVALID =
-  "A senha e confirmação saõ diferentes";
+export const ERROR_USER_PASSWORD_INVALID = "A senha e confirmação saõ diferentes";
 export const ERROR_USER_ALREADY_EXISTS = "O usuário já existe";
 export const TIME_IN_HOURS_TOKEN = 24;
 class CreateCustomerUseCase implements ICreateCustomerUseCase {
   private readonly repository: UserRepository;
   private readonly tokenizator: ICreateUserToken;
-  private readonly encrypter: Encrypter;
+  private readonly encrypter: IEncrypter;
+  private readonly mailSender: MailSender;
+
+
   constructor(dependencies: Dependencies) {
     this.repository = dependencies.repository;
     this.encrypter = dependencies.encrypter;
     this.tokenizator = dependencies.tokenizator;
+    this.mailSender = dependencies.mailSender;
   }
+
   async handle(userDTO: CustomerCreateDTO): Promise<Customer> {
     this.validate(userDTO);
 
@@ -38,6 +43,7 @@ class CreateCustomerUseCase implements ICreateCustomerUseCase {
       columnName: "email",
       columnValue: userDTO.email,
     });
+
     if (userReturned) {
       throw new Error(ERROR_USER_ALREADY_EXISTS);
     }
@@ -45,13 +51,24 @@ class CreateCustomerUseCase implements ICreateCustomerUseCase {
     const userToCreate = userDTO;
     userToCreate.password = this.encrypter.encrypt(userDTO.password);
     delete userToCreate.confirmPassword;
-
     const userCreated = await this.repository.create(userToCreate);
 
     const token = this.tokenizator.create(userCreated, TIME_IN_HOURS_TOKEN);
-    console.log(token);
-    throw new Error("Not implemented yet");
+    
+    this.mailSender.send({
+      from: "email@email.com",
+      to: "teste@email.com",
+      subject: "Email de teste do teste",
+      html: "<h1> O envio de email teste foi configurado</h1>"
+
+    })
+
+    return {
+      ...userCreated,
+      token,
+    };
   }
+
   private validate(userDTO: CustomerCreateDTO): boolean {
     if (userDTO.name == undefined) {
       throw new Error(ERROR_USER_NAME_INVALID);
